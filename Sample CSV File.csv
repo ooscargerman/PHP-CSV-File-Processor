@@ -4,5 +4,5 @@ Cost,Price,qTY,Profit Margin,Total Profit (usd),SKU
 1,2,3,4,3,6
 1,2,3,4,0.2,6
 1,2,-30,4,2,6
-1,2,3,4,1,6
+1,2,3,4,a,6
 1,2,3,4,5,6

@@ -17,7 +17,7 @@ $Processor = new Processor();
     <link rel="icon" href="Favicon.png">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
 
     <title>PHP Exercise – File Processor</title>
 </head>
@@ -40,7 +40,6 @@ $Processor = new Processor();
                 <div class="card">
                     <div class="card-header">Select CSV File</div>
                     <div class="card-body">
-
 
                         <form action="#" method="post" enctype="multipart/form-data">
                             <div class="form-group row">
@@ -82,7 +81,9 @@ if (isset($_POST["submit"])) {
                                         $UsdPosition = $Processor->SearchPositionArray("Total Profit (USD)", $Processor->CvsContent);
                                         $QTYPosition = $Processor->SearchPositionArray("QTY", $Processor->CvsContent);
                                         $ProfitMarginPosition = $Processor->SearchPositionArray("Profit Margin", $Processor->CvsContent);
-                                        array_push($Processor->CvsContent, 'Total Profit (CAD)');
+                                        if ($UsdPosition != false) {
+                                            array_push($Processor->CvsContent, 'Total Profit (CAD)');
+                                        }
                                         foreach ($Processor->CvsContent as $headercolumn) {
                                             echo "<th>$headercolumn</th>";
                                         }
@@ -91,30 +92,40 @@ if (isset($_POST["submit"])) {
                                     <?php
                                     echo '<tr>';
                                     foreach ($Processor->CvsData as $number => $number_array) {
-                                        $indexTemp=0;
+                                        $indexTemp = 0;
                                         foreach ($number_array as $key => $value) {
-                                            if($key == $UsdPosition){
-                                                $CAD = $value;
-                                                if(is_numeric($value)) {
-                                                    echo '<td><span class="badge badge-'. ($value >= 0 ?  "success" :  "danger" ).'">$'.money_format('%+.2n',$value).'</td>';
-                                                }else{
+                                            if ($UsdPosition != false) {
+                                                if ($key == $UsdPosition) {
+                                                    $CAD = $value;
+                                                    if (is_numeric($value)) {
+                                                        echo '<td><span class="badge badge-' . ($value >= 0 ? "success" : "danger") . '">$' . money_format('%+.2n', $value) . '</td>';
+                                                    } else {
+                                                        echo "<td>$value</td>";
+                                                    }
+                                                } elseif ($key == $QTYPosition || $key == $ProfitMarginPosition) {
+                                                    echo '<td><span class="badge badge-' . ($value >= 0 ? "success" : "danger") . '">' . $value . '</td>';
+
+                                                } else {
                                                     echo "<td>$value</td>";
                                                 }
-                                            }elseif ($key == $QTYPosition || $key == $ProfitMarginPosition ){
-                                                echo '<td><span class="badge badge-'. ($value >= 0 ?  "success" :  "danger" ).'">'.$value.'</td>';
+                                            } else {
+                                                if ($key == $QTYPosition || $key == $ProfitMarginPosition) {
+                                                    echo '<td><span class="badge badge-' . ($value >= 0 ? "success" : "danger") . '">' . $value . '</td>';
 
-                                            }else{
-                                                echo "<td>$value</td>";
+                                                } else {
+                                                    echo "<td>$value</td>";
+                                                }
+
                                             }
+
                                             $Processor->arrayHeaders[$Processor->arrayIndexHeaders[$indexTemp]] += $value;
                                             $indexTemp++;
                                         }
-                                        echo '<td><span class="badge badge-'. ($CAD >= 0 ?  "success" :  "danger" ).'">$'.$Processor->getCAD($CAD).'</td>';
+                                        if ($UsdPosition != false) {
+                                            echo '<td><span class="badge badge-' . ($CAD >= 0 ? "success" : "danger") . '">$' . $Processor->getCAD($CAD) . '</td>';
+                                        }
                                         echo " </tr>";
-
                                     }
-
-
                                     ?>
 
                                 </table>
@@ -130,15 +141,20 @@ if (isset($_POST["submit"])) {
                                         </tr>
                                         <?php
                                         foreach ($Processor->arrayHeaders as $k => $v) {
-                                            if(strcasecmp($k, "Cost") == 0|| strcasecmp($k, "QTY") == 0 || strcasecmp($k, "Price") == 0
-                                                || strcasecmp($k, "Profit Margin") == 0){
+                                            if (strcasecmp($k, "Cost") == 0 || strcasecmp($k, "QTY") == 0 || strcasecmp($k, "Price") == 0
+                                                || strcasecmp($k, "Profit Margin") == 0) {
                                                 echo "<td>$v</td>";
-                                            }elseif (strcasecmp($k, "Total Profit (USD)") == 0){
+                                            } elseif (strcasecmp($k, "Total Profit (USD)") == 0) {
                                                 $USDtoCAD = $v;
-                                                echo '<td><span class="badge badge-'. ($v >= 0 ?  "success" :  "danger" ).'">$'.$v.'</td>';
+                                                echo '<td><span class="badge badge-' . ($v >= 0 ? "success" : "danger") . '">$' . $v . '</td>';
                                             }
                                         }
-                                        echo '<td><span class="badge badge-'. ($Processor->getCAD($USDtoCAD) >= 0 ?  "success" :  "danger" ).'">$'.$Processor->getCAD($USDtoCAD).'</td>';
+                                        if ($UsdPosition != false) {
+                                            echo '<td><span class="badge badge-' . ($Processor->getCAD($USDtoCAD) >= 0 ? "success" : "danger") . '">$' . $Processor->getCAD($USDtoCAD) . '</td>';
+                                        }else{
+                                            echo '<td><span class="badge badge-danger">$0.00</td>';
+
+                                        }
                                         ?>
                                 </table>
                             </div>
@@ -157,6 +173,6 @@ if (isset($_POST["submit"])) {
 </div>
 </div>
 <script src="js/input.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="js/jquery.min.js"></script>
 </body>
 </html>
